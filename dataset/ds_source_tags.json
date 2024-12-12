@@ -1,0 +1,40 @@
+{
+	"name": "ds_source_tags",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SqlServer1",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "sources"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "userId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "movieId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "tag",
+				"type": "varchar"
+			},
+			{
+				"name": "timestamp",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "tags1"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

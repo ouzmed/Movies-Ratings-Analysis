@@ -1,0 +1,9 @@
+{
+	"name": "adf-moviesratings",
+	"location": "francecentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "8c253315-7a45-4f74-9085-eb8aaeb2bdb0",
+		"tenantId": "4209cd04-f7af-4bd7-b1ec-e395a24b2b40"
+	}
+}
