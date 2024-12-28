@@ -14,6 +14,7 @@ display(df_clean_tags)
 # COMMAND ----------
 
 # DBTITLE 1,Question 1
+from pyspark.sql.functions import count
 df_clean_ratings.groupBy("year").agg(count("rating").alias("NbRatings")).orderBy("year").show(truncate=False)
 
 # COMMAND ----------
@@ -49,6 +50,7 @@ display(movies_18)
 # COMMAND ----------
 
 # DBTITLE 1,Question 4
+from pyspark.sql.functions import col, avg, count
 df_rated_untaged = df_join_movies_tags.filter((df_join_movies_tags.tag.isNull()==True) & (df_join_movies_tags.rating.isNull()==False))
 #display(df_rated_untaged)
 df_rated_untaged.groupBy("movie_id","title").agg(avg("rating"),count("rating").alias("NbRating")).filter(col("NbRating")>30).limit(10).show()

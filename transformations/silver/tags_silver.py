@@ -1,24 +1,36 @@
 # Databricks notebook source
-from pyspark.sql.functions import col, date_format
+# MAGIC %run "/Workspace/Users/sof_ou@outlook.fr/Movies-Ratings-Analysis/transformations/setup/commun variables"
 
 # COMMAND ----------
 
-schema = "userId int, movieId int,tag string, timestamp int"
+def getSchema():
+    schema = "userId int, movieId int,tag string, timestamp int"
+    return schema
+
+def readTags(schema, location):
+    from pyspark.sql.functions import col, date_format
+    return (
+        spark.read
+             .format("csv")
+             .schema(schema)
+             .option("header", "true")
+             .load(location)
+             .withColumn("timestamp", date_format(col("timestamp").cast("timestamp"), "yyyy-MM-dd"))
+             .withColumnRenamed("userId", "user_id")
+             .withColumnRenamed("movieId", "movie_id")
+    )
+
+def writeTags(table_name):
+
+    df = readTags(getSchema(), raw_tags_location)
+    df.write.mode("overwrite").saveAsTable(table_name)
+
 
 # COMMAND ----------
 
-df_tags_raw = spark.read.format("csv").schema(schema).option("header", "true").load("dbfs:/mnt/movies/raw_tags/dbo.tags1.csv")
+writeTags("tags_sl")
 
 # COMMAND ----------
 
-df_formated = df_tags_raw.withColumn("timestamp", date_format(col("timestamp").cast("timestamp"), "yyyy-MM-dd"))\
-    .withColumnRenamed("userId", "user_id")\
-    .withColumnRenamed("movieId", "movie_id")
-
-# COMMAND ----------
-
-display(df_formated)
-
-# COMMAND ----------
-
-df_formated.write.mode("overwrite").save("/mnt/movies/clean_tags/tags_sl")
+# MAGIC %sql
+# MAGIC select * from tags_sl
