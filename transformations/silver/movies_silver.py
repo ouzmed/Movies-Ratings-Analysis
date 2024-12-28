@@ -1,22 +1,32 @@
 # Databricks notebook source
-# DBTITLE 1,define the schema
-schema = "movieID int, title string, genres string"
+# MAGIC %run "/Workspace/Users/sof_ou@outlook.fr/Movies-Ratings-Analysis/transformations/setup/commun variables"
 
 # COMMAND ----------
 
-df_raw_movies = spark.read.format("csv").schema(schema).option("header","true").load("dbfs:/mnt/movies/raw_movies/movies.csv")
+# define the schema for the raw_movies
+def getSchema():
+    schema = "movieID int, title string, genres string"
+    return schema
+
+# read the raw_movies
+def readRawMovies(schema, location_path):
+    from pyspark.sql.functions import current_date
+    return (
+        spark.read
+             .format("csv")
+             .schema(schema)
+             .option("header", "true")
+             .load(location_path)
+             .withColumn("date_injestion", current_date())
+             .withColumnRenamed("movieId","movie_id")
+    )
+
+# write the raw_movies
+def writeRawMovies(table_name):
+    df = readRawMovies(getSchema(),raw_movies_location)
+    df.write.mode("overwrite").saveAsTable(table_name)
 
 # COMMAND ----------
 
-display(df_raw_movies)
-
-# COMMAND ----------
-
-from pyspark.sql.functions import current_date
-df_movies_injest = df_raw_movies.withColumn("date_injestion", current_date())\
-    .withColumnRenamed("movieId","movie_id")
-display(df_movies_injest)
-
-# COMMAND ----------
-
-df_movies_injest.write.mode("overwrite").save("/mnt/movies/clean_movies/movies_sl")
+# execute the loading into the raw_movies delta table
+writeRawMovies("movies_sl")
