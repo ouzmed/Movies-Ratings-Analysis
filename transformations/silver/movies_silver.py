@@ -5,7 +5,7 @@
 
 # define the schema for the raw_movies
 def getSchema():
-    schema = "movieID int, title string, genres string"
+    schema = "movieId int, title string, genres string"
     return schema
 
 # read the raw_movies

@@ -50,24 +50,57 @@ display(movies_18)
 # COMMAND ----------
 
 # DBTITLE 1,Question 4
-from pyspark.sql.functions import col, avg, count
+from pyspark.sql.functions import col, avg, count, round
 df_rated_untaged = df_join_movies_tags.filter((df_join_movies_tags.tag.isNull()==True) & (df_join_movies_tags.rating.isNull()==False))
 #display(df_rated_untaged)
-df_rated_untaged.groupBy("movie_id","title").agg(avg("rating"),count("rating").alias("NbRating")).filter(col("NbRating")>30).limit(10).show()
+df_rated_untaged.groupBy("movie_id","title").agg(round(avg("rating").alias("avg_rating"),2),count("rating").alias("nb_rating")).filter(col("nb_rating")>30).limit(10).show()
 
 # COMMAND ----------
 
 display(df_rated_untaged)
-
-# COMMAND ----------
-
-display(df_clean_tags.groupBy("movie_id").agg(count("tag").alias("NbTag")).orderBy("NbTag", ascending=False))
-display(df_clean_tags.groupBy("user_id").agg(count("tag").alias("NbTag")).orderBy("NbTag", ascending=False))
+display(df_rated_untaged.count())
 
 # COMMAND ----------
 
 # DBTITLE 1,Question 5
 df_avg_tag = df_join_movies_tags.groupBy("movie_id").agg(count("tag").alias("NbTag")).orderBy("NbTag", ascending=False)
 display(df_avg_tag)
+display(df_clean_tags.groupBy("user_id").agg(count("tag").alias("NbTag")).orderBy("NbTag", ascending=False))
 
 
+# COMMAND ----------
+
+display(df_clean_movies.head(1))
+#display(df_clean_ratings.head(1))
+display(df_clean_tags.head(1))
+
+# COMMAND ----------
+
+# DBTITLE 1,Question 6
+#users who taged movies without rateing them
+display(df_clean_tags.join(df_clean_ratings, on="movie_id", how="left").filter(col("rating").isNull()).select("tags_sl.user_id").distinct())
+
+# COMMAND ----------
+
+# DBTITLE 1,Question 7
+display(df_join_movies_ratings.groupBy("genres").agg(count("rating").alias("count_ratings")).orderBy(col("count_ratings").desc()).limit(5))
+print("the most genre rated is Comedy")
+
+# COMMAND ----------
+
+# DBTITLE 1,Question 8
+display(df_clean_movies.join(df_clean_tags, on="movie_id", how="inner").groupBy("genres").agg(count("tag").alias("count_tag")).orderBy(col("count_tag").desc()).limit(5))
+print("the most genre tagged is Drama")
+
+# COMMAND ----------
+
+# DBTITLE 1,Question 9
+display(df_clean_movies.join(df_clean_tags, on="movie_id", how="inner").groupBy("title").agg(count("tag").alias("nb_tag")).orderBy(col("nb_tag").desc()).limit(1))
+#display(df_clean_movies.filter(df_clean_movies.movie_id==296).select("title"))
+
+# COMMAND ----------
+
+# DBTITLE 1,Question 10
+# top 10 movies in terms of average rating
+df_q10 = df_clean_movies.join(df_clean_ratings, on="movie_id", how="inner").select("movie_id", "title", "user_id", "rating")
+display(df_q10.groupBy("title").agg(count("user_id").alias("NbUser"), round(avg("rating"), 2).alias("avg_rating")).filter(col("NbUser") > 30).orderBy(col("avg_rating").desc()).select("title").limit(10))
